@@ -9,9 +9,93 @@ using System.Text.RegularExpressions;
 
 public class RobotOnMoon
 {
-    public string isSafeCommand(string[] board, string S)
+    private struct TPosition
     {
-        return default(string);
+        public TPosition(int x, int y)
+        {
+            this.X_ = x;
+            this.Y_ = y;
+        }
+
+        public TPosition SimulateMove(char move)
+        {
+            switch (move)
+            {
+                case 'U': return new TPosition(X_ - 1, Y_);
+                case 'D': return new TPosition(X_ + 1, Y_);
+                case 'L': return new TPosition(X_, Y_ - 1);
+                case 'R': return new TPosition(X_, Y_ + 1);
+                default: return this;
+            }
+        }
+
+        public int X_, Y_;
+    }
+
+    private struct TBoard
+    {
+
+        public enum ECode
+        {
+            Success = 0,
+            Death = 1,
+            IsWall = 2,
+        };
+
+        public TBoard(string[] board)
+        {
+            this.Board = board;
+            this.Height = board.Length;
+            this.Width = board[0].Length;
+        }
+
+        public ECode ValidatePosition(TPosition pos)
+        {
+
+            if (pos.X_ < 0 || pos.X_ >= Height ||
+                pos.Y_ < 0 || pos.Y_ >= Width)
+                return ECode.Death;
+
+            if (Board[pos.X_][pos.Y_] == '#')
+                return ECode.IsWall;
+
+            return ECode.Success;
+        }
+
+        public TPosition FindStart()
+        {
+            for (int i = 0; i < Height; i++)
+                for (int j = 0; j < Width; j++)
+                    if (Board[i][j] == 'S')
+                        return new TPosition(i, j);
+
+            throw new Exception("The start was not found!");
+        }
+
+        private int Height, Width;
+        private string[] Board;
+    }
+
+    public string isSafeCommand(string[] board, string moves)
+    {
+        TBoard b = new TBoard(board);
+
+        TPosition current = b.FindStart();
+
+        foreach (char move in moves)
+        {
+
+            TPosition next = current.SimulateMove(move);
+            TBoard.ECode result = b.ValidatePosition(next);
+
+            if (result == TBoard.ECode.Death)
+                return "Dead";
+
+            if (result == TBoard.ECode.Success)
+                current = next;
+        }
+
+        return "Alive";
     }
 
     #region Testing code
@@ -81,42 +165,42 @@ public class RobotOnMoon
         string p2;
 
         // ----- test 0 -----
-        p0 = new string[] {".....", ".###.", "..S#.", "...#."};
+        p0 = new string[] { ".....", ".###.", "..S#.", "...#." };
         p1 = "URURURURUR";
         p2 = "Alive";
         all_right = KawigiEdit_RunTest(0, p0, p1, true, p2) && all_right;
         // ------------------
 
         // ----- test 1 -----
-        p0 = new string[] {".....", ".###.", "..S..", "...#."};
+        p0 = new string[] { ".....", ".###.", "..S..", "...#." };
         p1 = "URURURURUR";
         p2 = "Dead";
         all_right = KawigiEdit_RunTest(1, p0, p1, true, p2) && all_right;
         // ------------------
 
         // ----- test 2 -----
-        p0 = new string[] {".....", ".###.", "..S..", "...#."};
+        p0 = new string[] { ".....", ".###.", "..S..", "...#." };
         p1 = "URURU";
         p2 = "Alive";
         all_right = KawigiEdit_RunTest(2, p0, p1, true, p2) && all_right;
         // ------------------
 
         // ----- test 3 -----
-        p0 = new string[] {"#####", "#...#", "#.S.#", "#...#", "#####"};
+        p0 = new string[] { "#####", "#...#", "#.S.#", "#...#", "#####" };
         p1 = "DRULURLDRULRUDLRULDLRULDRLURLUUUURRRRDDLLDD";
         p2 = "Alive";
         all_right = KawigiEdit_RunTest(3, p0, p1, true, p2) && all_right;
         // ------------------
 
         // ----- test 4 -----
-        p0 = new string[] {"#####", "#...#", "#.S.#", "#...#", "#.###"};
+        p0 = new string[] { "#####", "#...#", "#.S.#", "#...#", "#.###" };
         p1 = "DRULURLDRULRUDLRULDLRULDRLURLUUUURRRRDDLLDD";
         p2 = "Dead";
         all_right = KawigiEdit_RunTest(4, p0, p1, true, p2) && all_right;
         // ------------------
 
         // ----- test 5 -----
-        p0 = new string[] {"S"};
+        p0 = new string[] { "S" };
         p1 = "R";
         p2 = "Dead";
         all_right = KawigiEdit_RunTest(5, p0, p1, true, p2) && all_right;
