@@ -7,6 +7,8 @@ class Program
 {
     static void Main(string[] args)
     {
+        Task2.Run();
+
         Console.WriteLine("Hello, Gold Investor!");
 
         // Step 1: Get gold prices
@@ -31,6 +33,5 @@ class Program
         GoldResultPrinter.PrintSingleValue(Math.Round(avgPrice, 2), "Average Gold Price Last Half Year");
 
         Console.WriteLine("\nGold Analyis Queries with LINQ Completed.");
-
     }
 }
